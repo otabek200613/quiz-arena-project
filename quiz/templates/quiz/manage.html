@@ -1,0 +1,474 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚙️ QuizArena — Savollar Boshqaruvi</title>
+<link rel="stylesheet" href="{% static 'css/quiz.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  body { min-height: 100vh; }
+
+  .admin-wrap {
+    position: relative; z-index: 5;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 30px 20px 80px;
+  }
+
+  .page-title {
+    font-family: var(--font-head);
+    font-size: 22px; font-weight: 900;
+    color: #b347ff;
+    text-shadow: 0 0 20px #b347ff;
+    margin-bottom: 6px;
+  }
+  .page-sub { color: var(--muted); font-size: 13px; margin-bottom: 30px; }
+
+  /* STATS */
+  .q-stats {
+    display: flex; gap: 12px; margin-bottom: 28px; flex-wrap: wrap;
+  }
+  .q-stat {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .q-stat-num { font-family: var(--font-head); font-size: 22px; color: #b347ff; }
+  .q-stat-label { font-size: 12px; color: var(--muted); }
+
+  /* ADD FORM */
+  .add-card {
+    background: var(--surface);
+    border: 1px solid #2a1a4a;
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 28px;
+  }
+  .add-card-title {
+    font-family: var(--font-head);
+    font-size: 13px; color: #b347ff;
+    letter-spacing: 2px; margin-bottom: 20px;
+  }
+
+  .form-row { margin-bottom: 16px; }
+  .form-label {
+    display: block; font-size: 11px;
+    font-family: var(--font-head); color: var(--muted);
+    letter-spacing: 2px; margin-bottom: 8px;
+  }
+  .form-input, .form-textarea {
+    width: 100%;
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .form-textarea { resize: vertical; min-height: 70px; }
+  .form-input:focus, .form-textarea:focus {
+    border-color: #b347ff;
+    box-shadow: 0 0 0 3px rgba(179,71,255,.1);
+  }
+
+  .options-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 16px;
+  }
+  .option-input-wrap {
+    position: relative;
+  }
+  .option-letter {
+    position: absolute; left: 12px; top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-head); font-size: 12px;
+    color: var(--muted); pointer-events: none;
+  }
+  .option-input-wrap .form-input { padding-left: 32px; }
+  .option-input-wrap .form-input.correct-opt {
+    border-color: var(--neon);
+    background: rgba(0,255,136,.07);
+  }
+
+  .correct-label {
+    font-size: 12px; color: var(--muted); margin-bottom: 10px;
+  }
+  .correct-btns {
+    display: flex; gap: 8px; margin-bottom: 16px;
+  }
+  .correct-btn {
+    flex: 1; padding: 10px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-family: var(--font-head); font-size: 12px;
+    cursor: pointer; transition: all .2s;
+    text-align: center;
+  }
+  .correct-btn:hover { border-color: var(--neon); color: var(--text); }
+  .correct-btn.selected {
+    border-color: var(--neon);
+    background: rgba(0,255,136,.12);
+    color: var(--neon);
+  }
+
+  .btn-add {
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; width: 100%;
+    padding: 14px; border-radius: 8px;
+    background: linear-gradient(135deg, #b347ff, #7c3aed);
+    color: #fff; border: none;
+    font-family: var(--font-head); font-size: 13px;
+    font-weight: 700; letter-spacing: 2px;
+    cursor: pointer; transition: all .2s;
+    box-shadow: 0 0 20px rgba(179,71,255,.3);
+  }
+  .btn-add:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 30px rgba(179,71,255,.5);
+  }
+
+  /* QUESTIONS LIST */
+  .questions-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .q-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex; gap: 16px; align-items: flex-start;
+    animation: lb-enter .3s ease;
+    transition: border-color .2s;
+  }
+  .q-item:hover { border-color: #2a1a4a; }
+
+  .q-num {
+    font-family: var(--font-head); font-size: 11px;
+    color: #b347ff; min-width: 28px;
+    padding-top: 2px;
+  }
+  .q-body { flex: 1; }
+  .q-text-display {
+    font-size: 14px; color: var(--text);
+    margin-bottom: 10px; line-height: 1.5;
+  }
+  .q-opts {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .q-opt {
+    font-size: 12px; padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .q-opt.is-correct {
+    border-color: var(--neon);
+    background: rgba(0,255,136,.1);
+    color: var(--neon);
+  }
+  .q-actions { display: flex; gap: 8px; align-items: center; }
+  .btn-del {
+    background: none; border: 1px solid transparent;
+    color: var(--muted); font-size: 16px;
+    cursor: pointer; padding: 6px 10px;
+    border-radius: 6px; transition: all .2s;
+  }
+  .btn-del:hover { border-color: var(--pink); color: var(--pink); }
+
+  .btn-up, .btn-down {
+    background: none; border: 1px solid transparent;
+    color: var(--muted); font-size: 14px;
+    cursor: pointer; padding: 5px 8px;
+    border-radius: 6px; transition: all .2s;
+  }
+  .btn-up:hover, .btn-down:hover { border-color: var(--border); color: var(--text); }
+
+  /* EMPTY */
+  .no-questions {
+    text-align: center; padding: 60px 20px;
+    color: var(--muted); font-size: 14px;
+  }
+  .no-questions .big { font-size: 40px; margin-bottom: 12px; }
+
+  /* SAVE BANNER */
+  .save-banner {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(7,7,20,.97);
+    border-top: 1px solid #2a1a4a;
+    padding: 14px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    z-index: 100;
+  }
+  .save-info { font-size: 13px; color: var(--muted); }
+  .save-info span { color: #b347ff; font-family: var(--font-head); }
+  .btn-save {
+    padding: 12px 28px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--neon), #00cc66);
+    color: var(--bg); border: none;
+    font-family: var(--font-head); font-size: 13px;
+    font-weight: 700; letter-spacing: 2px;
+    cursor: pointer; transition: all .2s;
+    box-shadow: 0 0 20px rgba(0,255,136,.3);
+  }
+  .btn-save:hover { transform: translateY(-2px); box-shadow: 0 4px 30px rgba(0,255,136,.5); }
+
+  .toast {
+    position: fixed; top: 20px; right: 20px;
+    background: var(--surface); border: 1px solid var(--neon);
+    border-radius: 10px; padding: 14px 20px;
+    font-size: 14px; color: var(--neon);
+    z-index: 200; opacity: 0;
+    transform: translateY(-10px);
+    transition: all .3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 600px) {
+    .options-row { grid-template-columns: 1fr; }
+    .correct-btns { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+<div class="scanlines"></div>
+<div class="grid-bg"></div>
+
+<header class="site-header">
+  <div class="logo-area">
+    <span class="logo-icon">⚙️</span>
+    <span class="logo-text" style="color:#b347ff;text-shadow:0 0 20px #b347ff">Savollar</span>
+  </div>
+  <div style="display:flex;gap:12px">
+    <a href="/" class="results-link">⚡ Test</a>
+    <a href="/results/" class="results-link">📊 Natijalar</a>
+  </div>
+</header>
+
+<div class="admin-wrap">
+
+  <div class="page-title">Savollar Boshqaruvi</div>
+  <div class="page-sub">Savollarni qo'shing, o'chiring va tartibini o'zgartiring. Saqlash tugmasi server faylini yangilaydi.</div>
+
+  <!-- STATS -->
+  <div class="q-stats">
+    <div class="q-stat">
+      <div class="q-stat-num" id="totalCount">0</div>
+      <div class="q-stat-label">Jami savol</div>
+    </div>
+    <div class="q-stat">
+      <div class="q-stat-num" style="color:var(--neon)" id="savedCount">0</div>
+      <div class="q-stat-label">Saqlangan</div>
+    </div>
+  </div>
+
+  <!-- ADD FORM -->
+  <div class="add-card">
+    <div class="add-card-title">➕ YANGI SAVOL QO'SHISH</div>
+
+    <div class="form-row">
+      <label class="form-label">Savol matni</label>
+      <textarea class="form-textarea" id="qText" placeholder="Savol matnini kiriting..."></textarea>
+    </div>
+
+    <label class="form-label">Javob variantlari</label>
+    <div class="options-row">
+      <div class="option-input-wrap">
+        <span class="option-letter">A</span>
+        <input type="text" class="form-input" id="opt0" placeholder="A varianti">
+      </div>
+      <div class="option-input-wrap">
+        <span class="option-letter">B</span>
+        <input type="text" class="form-input" id="opt1" placeholder="B varianti">
+      </div>
+      <div class="option-input-wrap">
+        <span class="option-letter">C</span>
+        <input type="text" class="form-input" id="opt2" placeholder="C varianti">
+      </div>
+      <div class="option-input-wrap">
+        <span class="option-letter">D</span>
+        <input type="text" class="form-input" id="opt3" placeholder="D varianti">
+      </div>
+    </div>
+
+    <div class="correct-label">To'g'ri javobni tanlang:</div>
+    <div class="correct-btns">
+      <button class="correct-btn selected" data-idx="0" onclick="selectCorrect(0)">A — To'g'ri</button>
+      <button class="correct-btn" data-idx="1" onclick="selectCorrect(1)">B — To'g'ri</button>
+      <button class="correct-btn" data-idx="2" onclick="selectCorrect(2)">C — To'g'ri</button>
+      <button class="correct-btn" data-idx="3" onclick="selectCorrect(3)">D — To'g'ri</button>
+    </div>
+
+    <button class="btn-add" onclick="addQuestion()">
+      <span>➕</span>
+      <span>Savol Qo'shish</span>
+    </button>
+  </div>
+
+  <!-- LIST -->
+  <div class="questions-list" id="questionsList"></div>
+
+</div>
+
+<!-- SAVE BANNER -->
+<div class="save-banner">
+  <div class="save-info">Jami: <span id="bannerCount">0</span> ta savol</div>
+  <button class="btn-save" onclick="saveToServer()">💾 Serverga Saqlash</button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+let questions = [];
+let selectedCorrect = 0;
+let savedCount = 0;
+
+// Server dan yuklash
+async function loadQuestions() {
+  try {
+    const res = await fetch('/api/questions/');
+    const data = await res.json();
+    questions = data.questions;
+    savedCount = questions.length;
+    renderAll();
+  } catch(e) {
+    console.error('Yuklanmadi:', e);
+  }
+}
+
+function selectCorrect(idx) {
+  selectedCorrect = idx;
+  document.querySelectorAll('.correct-btn').forEach((b, i) => {
+    b.classList.toggle('selected', i === idx);
+  });
+  // Highlight correct option input
+  document.querySelectorAll('.option-input-wrap .form-input').forEach((inp, i) => {
+    inp.classList.toggle('correct-opt', i === idx);
+  });
+}
+
+function addQuestion() {
+  const text = document.getElementById('qText').value.trim();
+  const opts = [
+    document.getElementById('opt0').value.trim(),
+    document.getElementById('opt1').value.trim(),
+    document.getElementById('opt2').value.trim(),
+    document.getElementById('opt3').value.trim(),
+  ];
+
+  if (!text) { showToast('❌ Savol matnini kiriting!', 'error'); return; }
+  if (opts.some(o => !o)) { showToast('❌ Barcha 4 ta variantni to\'ldiring!', 'error'); return; }
+
+  questions.push({ q: text, options: opts, answer: selectedCorrect });
+  clearForm();
+  renderAll();
+  showToast('✅ Savol qo\'shildi! Saqlashni unutmang.');
+}
+
+function clearForm() {
+  document.getElementById('qText').value = '';
+  ['opt0','opt1','opt2','opt3'].forEach(id => document.getElementById(id).value = '');
+  selectCorrect(0);
+  document.getElementById('qText').focus();
+}
+
+function deleteQuestion(idx) {
+  if (!confirm('Bu savolni o\'chirishni xohlaysizmi?')) return;
+  questions.splice(idx, 1);
+  renderAll();
+  showToast('🗑️ Savol o\'chirildi');
+}
+
+function moveUp(idx) {
+  if (idx === 0) return;
+  [questions[idx-1], questions[idx]] = [questions[idx], questions[idx-1]];
+  renderAll();
+}
+
+function moveDown(idx) {
+  if (idx === questions.length - 1) return;
+  [questions[idx], questions[idx+1]] = [questions[idx+1], questions[idx]];
+  renderAll();
+}
+
+function renderAll() {
+  const list = document.getElementById('questionsList');
+  const letters = ['A','B','C','D'];
+
+  document.getElementById('totalCount').textContent = questions.length;
+  document.getElementById('savedCount').textContent = savedCount;
+  document.getElementById('bannerCount').textContent = questions.length;
+
+  if (questions.length === 0) {
+    list.innerHTML = '<div class="no-questions"><div class="big">📝</div>Hali savollar yo\'q.<br>Yuqoridan qo\'shing!</div>';
+    return;
+  }
+
+  list.innerHTML = questions.map((q, i) => `
+    <div class="q-item">
+      <div class="q-num">#${i+1}</div>
+      <div class="q-body">
+        <div class="q-text-display">${escHtml(q.q)}</div>
+        <div class="q-opts">
+          ${q.options.map((opt, oi) =>
+            `<span class="q-opt ${oi === q.answer ? 'is-correct' : ''}">${letters[oi]}: ${escHtml(opt)}</span>`
+          ).join('')}
+        </div>
+      </div>
+      <div class="q-actions">
+        <button class="btn-up" onclick="moveUp(${i})" title="Yuqoriga">↑</button>
+        <button class="btn-down" onclick="moveDown(${i})" title="Pastga">↓</button>
+        <button class="btn-del" onclick="deleteQuestion(${i})" title="O'chirish">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function saveToServer() {
+  try {
+    const res = await fetch('/api/questions/save/', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ questions })
+    });
+    const data = await res.json();
+    if (data.status === 'ok') {
+      savedCount = questions.length;
+      document.getElementById('savedCount').textContent = savedCount;
+      showToast('✅ ' + questions.length + ' ta savol serverga saqlandi!');
+    }
+  } catch(e) {
+    showToast('❌ Saqlashda xato!', 'error');
+  }
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.borderColor = type === 'error' ? 'var(--pink)' : 'var(--neon)';
+  t.style.color = type === 'error' ? 'var(--pink)' : 'var(--neon)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ENTER bilan qo'shish
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'Enter') addQuestion();
+});
+
+loadQuestions();
+</script>
+</body>
+</html>

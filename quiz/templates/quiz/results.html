@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📊 QuizArena — Natijalar</title>
+<link rel="stylesheet" href="{% static 'css/results.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="scanlines"></div>
+<div class="grid-bg"></div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="logo-area">
+    <span class="logo-icon">📊</span>
+    <span class="logo-text">Natijalar</span>
+  </div>
+  <div class="header-right">
+    <div class="live-badge">
+      <span class="live-dot"></span>
+      LIVE
+    </div>
+    <a href="/" class="results-link">⚡ Testga O'tish</a>
+  </div>
+</header>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat-chip">
+    <span class="chip-icon">👥</span>
+    <span class="chip-label">Jami</span>
+    <span class="chip-val" id="statTotal">0</span>
+  </div>
+  <div class="stat-chip">
+    <span class="chip-icon">✅</span>
+    <span class="chip-label">Tugatdi</span>
+    <span class="chip-val" id="statDone">0</span>
+  </div>
+  <div class="stat-chip">
+    <span class="chip-icon">⚡</span>
+    <span class="chip-label">Ishlayapti</span>
+    <span class="chip-val" id="statActive">0</span>
+  </div>
+  <div class="stat-chip">
+    <span class="chip-icon">❓</span>
+    <span class="chip-label">Savollar</span>
+    <span class="chip-val" id="statQuestions">0</span>
+  </div>
+</div>
+
+<!-- MAIN GRID -->
+<div class="main-grid">
+
+  <!-- LEFT: LEADERBOARD -->
+  <div class="panel panel-leaderboard">
+    <div class="panel-header">
+      <span class="panel-icon">🏆</span>
+      <span class="panel-title">Reyting</span>
+      <button class="reset-btn" onclick="resetAll()" title="Barcha natijalarni o'chirish">🗑️</button>
+    </div>
+    <div class="leaderboard-list" id="leaderboardList">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">🎮</div>
+        <div class="empty-text">Hali hech kim test ishlamadi</div>
+        <div class="empty-sub">Natijalar avtomatik yangilanadi</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: CHARTS -->
+  <div class="panel-stack">
+
+    <!-- BAR CHART -->
+    <div class="panel panel-chart">
+      <div class="panel-header">
+        <span class="panel-icon">📊</span>
+        <span class="panel-title">Ball Diagrammasi</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="barChart"></canvas>
+      </div>
+    </div>
+
+    <!-- PODIUM -->
+    <div class="panel panel-podium">
+      <div class="panel-header">
+        <span class="panel-icon">🥇</span>
+        <span class="panel-title">Top 3</span>
+      </div>
+      <div class="podium-wrap" id="podiumWrap">
+        <div class="podium-empty">Hali natijalar yo'q</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- DISTRIBUTION PANEL -->
+<div class="panel panel-wide">
+  <div class="panel-header">
+    <span class="panel-icon">📈</span>
+    <span class="panel-title">Ball Taqsimoti</span>
+  </div>
+  <div class="chart-wrap chart-wide">
+    <canvas id="pieChart"></canvas>
+  </div>
+</div>
+
+<!-- TICKER - bottom scrolling names -->
+<div class="ticker-wrap" id="tickerWrap" style="display:none">
+  <div class="ticker-label">🔥 HOT:</div>
+  <div class="ticker-track">
+    <div class="ticker-content" id="tickerContent"></div>
+  </div>
+</div>
+
+<script src="{% static 'js/results.js' %}"></script>
+</body>
+</html>

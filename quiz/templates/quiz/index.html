@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚡ QuizArena — Test</title>
+<link rel="stylesheet" href="{% static 'css/quiz.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="scanlines"></div>
+<div class="grid-bg"></div>
+
+<!-- PARTICLES -->
+<div id="particles"></div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="logo-area">
+    <span class="logo-icon">⚡</span>
+    <span class="logo-text">QuizArena</span>
+  </div>
+</header>
+
+<!-- ================================================
+     STEP 1: REGISTRATION
+================================================ -->
+<section id="step-register" class="step active">
+  <div class="card card-register">
+    <div class="card-glow"></div>
+    <h1 class="card-title">Xush kelibsiz!</h1>
+    <p class="card-subtitle">Testga kirish uchun ma'lumotlaringizni kiriting</p>
+
+    <div class="form-group">
+      <label class="form-label">Ismingiz</label>
+      <input type="text" id="nameInput" class="form-input" placeholder="Ismingizni kiriting..." maxlength="50" autocomplete="off">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Emoji logoingizni tanlang</label>
+      <div class="emoji-grid" id="emojiGrid">
+        <button class="emoji-btn selected" data-emoji="🦊">🦊</button>
+        <button class="emoji-btn" data-emoji="🐉">🐉</button>
+        <button class="emoji-btn" data-emoji="🦁">🦁</button>
+        <button class="emoji-btn" data-emoji="🐺">🐺</button>
+        <button class="emoji-btn" data-emoji="🦅">🦅</button>
+        <button class="emoji-btn" data-emoji="🐯">🐯</button>
+        <button class="emoji-btn" data-emoji="🦄">🦄</button>
+        <button class="emoji-btn" data-emoji="🐻‍❄️">🐻‍❄️</button>
+        <button class="emoji-btn" data-emoji="🦋">🦋</button>
+      </div>
+    </div>
+
+    <div class="preview-area" id="previewArea">
+      <div class="preview-avatar" id="previewAvatar">🦊</div>
+      <div class="preview-name" id="previewName">Ismingiz</div>
+    </div>
+
+    <button class="btn btn-primary" id="startBtn" onclick="startQuiz()">
+      <span>Testni Boshlash</span>
+      <span class="btn-arrow">→</span>
+    </button>
+
+    <p class="info-text">📝 Jami <strong>{{ total_questions }}</strong> ta savol</p>
+  </div>
+</section>
+
+<!-- ================================================
+     STEP 2: COUNTDOWN
+================================================ -->
+<section id="step-countdown" class="step">
+  <div class="countdown-wrap">
+    <div class="countdown-label">Tayyor bo'ling!</div>
+    <div class="countdown-number" id="countdownNum">3</div>
+    <div class="countdown-sub" id="countdownSub">Savollar boshlanmoqda...</div>
+  </div>
+</section>
+
+<!-- ================================================
+     STEP 3: QUESTION
+================================================ -->
+<section id="step-question" class="step">
+  <div class="quiz-container">
+
+    <!-- TOP BAR -->
+    <div class="quiz-topbar">
+      <div class="player-badge" id="playerBadge">
+        <span id="playerEmoji">🦊</span>
+        <span id="playerName">Foydalanuvchi</span>
+      </div>
+      <div class="quiz-meta">
+        <div class="meta-score">
+          <span class="meta-label">Ball</span>
+          <span class="meta-val" id="currentScore">0</span>
+        </div>
+        <div class="meta-timer" id="timerBox">
+          <span class="meta-label">Vaqt</span>
+          <span class="meta-val" id="timerVal">5</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="progress-wrap">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <span class="progress-text" id="progressText">1 / 10</span>
+    </div>
+
+    <!-- QUESTION CARD -->
+    <div class="question-card" id="questionCard">
+      <div class="q-number" id="qNumber">Savol 1</div>
+      <div class="q-text" id="qText">Savol yuklanmoqda...</div>
+
+      <div class="options-grid" id="optionsGrid">
+        <!-- JS tomonidan to'ldiriladi -->
+      </div>
+    </div>
+
+    <!-- FEEDBACK -->
+    <div class="feedback-bar" id="feedbackBar">
+      <span id="feedbackIcon"></span>
+      <span id="feedbackText"></span>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================================================
+     STEP 4: FINISH
+================================================ -->
+<section id="step-finish" class="step">
+  <div class="card card-finish">
+    <div class="finish-emoji" id="finishEmoji">🦊</div>
+    <h2 class="finish-title" id="finishTitle">Tabriklaymiz!</h2>
+    <div class="finish-score-wrap">
+      <div class="finish-score-num" id="finishScore">0</div>
+      <div class="finish-score-label" id="finishScoreLabel">/ 10 ball</div>
+    </div>
+    <div class="finish-percent" id="finishPercent">0%</div>
+
+    <div class="finish-stars" id="finishStars">⭐⭐⭐</div>
+
+    <div class="finish-stats">
+      <div class="stat-item">
+        <span class="stat-icon">⏱️</span>
+        <span class="stat-val" id="finishTime">0 soniya</span>
+        <span class="stat-label">Sarflangan vaqt</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-icon">🎯</span>
+        <span class="stat-val" id="finishAccuracy">0%</span>
+        <span class="stat-label">Aniqlik</span>
+      </div>
+    </div>
+
+    <div class="finish-buttons">
+      <a  class="btn btn-primary" target="_blank">📊 Natijalar asosiy ekranda</a>
+      <button class="btn btn-secondary" onclick="restartQuiz()">🔄 Qayta Boshlash</button>
+    </div>
+  </div>
+</section>
+{{ questions_json|json_script:"QUESTIONS_DATA" }}
+<script src="{% static 'js/quiz.js' %}"></script>
+</body>
+</html>
